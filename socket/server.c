@@ -13,7 +13,7 @@ main(int argc, char **argv)
         int pid = 0;
         if ((pid = fork()) < 0)
         {
-            fprintf(stderr, "fork error");
+            printf("fork error");
             exit(-1);
         }else if (pid == 0)
         {
@@ -24,7 +24,6 @@ main(int argc, char **argv)
         }else
         {
             // parent
-            listen_port++;
         }
     }
 
@@ -42,7 +41,7 @@ int start_server(int port)
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     if (listenfd == -1)
     {
-        fprintf(stderr, "failed to create socket.");
+        printf("failed to create socket.");
         exit(-1);
     }
 
@@ -57,7 +56,7 @@ int start_server(int port)
     ret = bind(listenfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if (ret == -1)
     {
-        fprintf(stderr, "failed to bind socket.");
+        printf("failed to bind socket.");
         close(listenfd);
         exit(-2);
     }
@@ -65,7 +64,7 @@ int start_server(int port)
     ret = listen(listenfd, 16);
     if (ret == -1)
     {
-        fprintf(stderr, "failed to listen.");
+        printf("failed to listen.");
         close(listenfd);
         exit(-3);
     }
@@ -84,7 +83,7 @@ int start_server(int port)
         client_sock = accept(listenfd, (struct sockaddr *)&client_addr, &client_addr_len);
         if (client_sock < 0)
         {
-            fprintf(stderr, "PID [%d] failed to accept\n", pid);
+            printf("PID [%d] failed to accept\n", pid);
             close(client_sock);
             exit(-3);
         }
@@ -116,7 +115,7 @@ int statistically_read(int sock, int pid)
 
         if (len <= 0)
         {
-            fprintf(stderr, "PID [%d] read error.", pid);
+            printf("PID [%d] read error.", pid);
             close(sock);
             exit(-1);
         }
@@ -125,12 +124,17 @@ int statistically_read(int sock, int pid)
 
         curr_time = time(NULL);
         elapsed_time = difftime(curr_time, last_time);
+
         if (elapsed_time >= 1)
         {
+            // report
+            printf("PID [%d] throughput %.2f MB per %.2f sec\n", pid, total_bytes/(1024*1024), elapsed_time);
+
             // renew last time
             last_time = time(NULL);
-            // report
-            printf("PID [%d] throughput %.2f MB per %.2f sec", pid, total_bytes/(1024*1024), elapsed_time);
+            total_bytes = 0;
         }
     }
+
+    return 0;
 }

@@ -13,7 +13,7 @@ int main(int argc, char **argv)
         int pid = 0;
         if ((pid = fork()) < 0)
         {
-            fprintf(stderr, "fork error");
+            printf("fork error");
             exit(-1);
         }else if (pid == 0)
         {
@@ -47,7 +47,7 @@ int bulk_send(int port)
     // 2. clear memory, set add and port
     bzero(&server_addr, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    inet_pton(AF_INET, SERVER_IP, &server_addr.sin_addr);
+    inet_pton(AF_INET, LOCAL_TEST_SERVER_IP, &server_addr.sin_addr);
     server_addr.sin_port = htons(port);
     
     // 3. connect to server
@@ -80,7 +80,7 @@ int bulkly_send_data(int sock, int pid)
         ret =  write(sock, message, size-1);
         if (ret < 0)
         {
-            fprintf(stderr, "PID [%d] Failed to send data.", pid);
+            printf("PID [%d] Failed to send data.", pid);
             close(sock);
             exit(-3);
         }

@@ -1,12 +1,13 @@
 #include "nio.h"
 
-int bulk_send(int port);
+int bulk_send(int port, int prio);
 int bulkly_send_data(int sock, int pid);
 
 int main(int argc, char **argv)
 {
     int p_num = 3;
     int server_port = SERVER_PORT;
+	int tos_val[3] = {0x38, 0x18, 0x00};
 
     for (int i=0; i<p_num; i++)
     {
@@ -20,7 +21,7 @@ int main(int argc, char **argv)
             // child
             int port = server_port + i;
             printf("PID [%d] start sending to %d\n", getpid(), port);
-            bulk_send(port);
+            bulk_send(port, tos_val[i]);
         }else
         {
             // parent
@@ -28,7 +29,7 @@ int main(int argc, char **argv)
     }
 }
 
-int bulk_send(int port)
+int bulk_send(int port, int prio)
 {
     int ret = 0;
     int sockfd = 0;
@@ -44,10 +45,17 @@ int bulk_send(int port)
         exit(-1);
     }
 
+	ret = setsockopt(sockfd, IPPROTO_IP, IP_TOS, &prio, sizeof(prio));
+	if (ret < 0)
+	{
+		printf("failed to set sockopt");
+		exit(-2);
+	}
+
     // 2. clear memory, set add and port
     bzero(&server_addr, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    inet_pton(AF_INET, LOCAL_TEST_SERVER_IP, &server_addr.sin_addr);
+    inet_pton(AF_INET, SERVER_IP, &server_addr.sin_addr);
     server_addr.sin_port = htons(port);
     
     // 3. connect to server

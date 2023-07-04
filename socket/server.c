@@ -108,7 +108,7 @@ int statistically_read(int sock, int pid, int port)
     double elapsed_time = 0;
 
     char filename[64] = {0};
-    snprintf(filename, sizeof(filename), "server_port_%d", port);
+    snprintf(filename, sizeof(filename), "log/server_port_%d.dat", port);
 
     // open log file
     FILE* file = fopen(filename, "w+");
@@ -141,7 +141,7 @@ int statistically_read(int sock, int pid, int port)
         {
             // report
             printf("PID [%d] throughput %.2f MB per %.2f sec\n", pid, total_bytes/(1024*1024), elapsed_time);
-            fprintf(file, "%.2ld %.2f", curr_time, total_bytes/(1024*1024));
+            fprintf(file, "%.2ld %.2f\n", curr_time, total_bytes/(1024*1024));
 
             // renew last time
             last_time = time(NULL);

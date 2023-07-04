@@ -10,4 +10,4 @@ server: server.c
 	$(CC) $(CFLAGS) -o server server.c 
 
 clean:
-	rm -f client server
+	rm -f client server log/*.dat

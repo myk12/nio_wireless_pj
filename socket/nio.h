@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <string.h>
 #include <ctype.h>
 #include <arpa/inet.h>
@@ -18,3 +19,6 @@
 #define MAXLINE 1024
 #define READ_BUFF_LEN (1024*1024)
 #define SEND_BUFF_LEN  (128*1024)
+
+#define CLIENT_STATISTIC
+#define STATISTIC_TIME_INTERVAL_SECOND (1) // second

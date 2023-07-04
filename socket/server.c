@@ -1,7 +1,7 @@
 #include "nio.h"
 
 int start_server(int port);
-int statistically_read(int sock, int pid);
+int statistically_read(int sock, int pid, int port);
 
 int
 main(int argc, char **argv)
@@ -94,18 +94,29 @@ int start_server(int port)
                 ntohs(client_addr.sin_port));
 
         // read data from client
-        statistically_read(client_sock, pid);
+        statistically_read(client_sock, pid, port);
 
     }
 
 }
 
-int statistically_read(int sock, int pid)
+int statistically_read(int sock, int pid, int port)
 {
     double total_bytes = 0;
     time_t last_time = time(NULL);
     time_t curr_time = time(NULL);
     double elapsed_time = 0;
+
+    char filename[64] = {0};
+    snprintf(filename, sizeof(filename), "server_port_%d", port);
+
+    // open log file
+    FILE* file = fopen(filename, "w+");
+    if (file == NULL)
+    {
+        printf("Failed to open log file\n");
+        exit(-4);
+    }
 
     while(1)
     {
@@ -117,7 +128,8 @@ int statistically_read(int sock, int pid)
         {
             printf("PID [%d] read error.", pid);
             close(sock);
-            exit(-1);
+            fclose(file);
+            exit(0);
         }
 
         total_bytes += len;
@@ -129,6 +141,7 @@ int statistically_read(int sock, int pid)
         {
             // report
             printf("PID [%d] throughput %.2f MB per %.2f sec\n", pid, total_bytes/(1024*1024), elapsed_time);
+            fprintf(file, "%.2ld %.2f", curr_time, total_bytes/(1024*1024));
 
             // renew last time
             last_time = time(NULL);
